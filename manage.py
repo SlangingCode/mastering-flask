@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
-from flask_script import Manager
+import os
+
+from flask_script import Server, Manager
 from app import app
 
 manager = Manager(app)
+manager.add_command("runserver", Server(host=os.environ['IP'], port=os.environ['PORT']))
 
 
 @manager.shell
