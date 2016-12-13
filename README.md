@@ -1,2 +1,2 @@
 # mastering-flask
-Course work from Mastering Flask by Packt Publishing
+Course work from Mastering Flask from Packt Publishing
