@@ -3,12 +3,15 @@
 import os 
 
 from flask_script import Server, Manager
+from flask_migrate import Migrate, MigrateCommand
 from app import app
 
 manager = Manager(app)
 
 if hasattr(os.environ, 'IP') and hasattr(os.environ, 'PORT'):
     manager.add_command("runserver", Server(host=os.environ['IP'], port=os.environ['PORT']))
+
+manager.add_command('db', MigrateCommand)
 
 
 @manager.shell
