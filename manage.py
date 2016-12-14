@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
-import os
+import os 
 
 from flask_script import Server, Manager
 from app import app
 
 manager = Manager(app)
-manager.add_command("runserver", Server(host=os.environ['IP'], port=os.environ['PORT']))
+
+if hasattr(os.environ, 'IP') and hasattr(os.environ, 'PORT'):
+    manager.add_command("runserver", Server(host=os.environ['IP'], port=os.environ['PORT']))
 
 
 @manager.shell
