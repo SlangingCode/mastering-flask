@@ -1,38 +1,14 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Erin Hensen's Page</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+{% extends "base.html" %}
 
-        <link rel="stylesheet" href="/static/css/bootstrap.min.css"></script>
-        
-        
-    </head>
+{% block title %}{{ actor.first_name }} {{ actor.last_name }}'s Page{% endblock %}
 
-    <body>
-        <nav class="navbar navbar-full navbar-dark bg-inverse">
-          <a class="navbar-brand" href="#">WFDB</a>
-          <ul class="nav navbar-nav">
-            <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="/blog">Blog</a></li>
-          </ul>
-        </nav>
-        <br>
-
-        <div class="container">
-            
-                
-            
-
-            
+{% block body %}
     <div class="row">
         <div class="col-md-4 col-md-offset-2">
-            <h1>Erin Hensen</h1>
-            <p><strong>Birth Date</strong> 1990-10-21</p>
-            
-            <p><strong>Hometown</strong> Southfield, MI</p>
+            <h1>{{ actor.first_name }} {{ actor.last_name }}</h1>
+            <p><strong>Birth Date</strong> {{ actor.birthday }}</p>
+            {% if actor.deathday is not none %} <p><strong>Death Date</strong>  {{ actor.deathday }} </p> {% endif %}
+            <p><strong>Hometown</strong> {{ actor.hometown }}</p>
         </div>
         <div class="col-md-4">
             <img src="http://placehold.it/250x300">
@@ -41,9 +17,7 @@
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <h2>Bio</h2>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus cursus dignissim nisi a euismod. Donec ullamcorper convallis eleifend. Quisque quis nulla eros. Etiam et arcu sapien. Praesent fringilla nisi rutrum rhoncus pulvinar. Donec facilisis tempor ex, quis vulputate odio euismod sed. Aenean sed accumsan massa. Vivamus vitae mauris eu lorem rutrum semper. Nam vel lacus id massa tincidunt venenatis nec quis metus. Mauris euismod porta ipsum ut finibus. Curabitur interdum odio eros, eget bibendum nulla lobortis vitae. Donec interdum mollis accumsan. Aliquam gravida, mauris a pretium semper, diam sapien tincidunt massa, ut eleifend leo mauris et ex. Phasellus volutpat cursus pretium. In a scelerisque neque.
-
-</p>
+            <p>{{ actor.bio }}</p>
         </div>
     </div>
     <div class="row">
@@ -58,25 +32,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    
+                    {% for role in actor.roles %}
                         <tr>
-                            <td><a href="/movie/6">Devils Never Cry</a></td>
-                            <td>Mark P. Dossantos</td>
-                            <td>2005-02-17</td>
+                            <td><a href="{{ url_for('.movie', movie_id=role.movie.id) }}">{{ role.movie.name }}</a></td>
+                            <td>{{ role.role_name }}</td>
+                            <td>{{ role.movie.release_date }}</td>
                         </tr>
-                    
-                        <tr>
-                            <td><a href="/movie/7">Steel Cog: The Movie</a></td>
-                            <td>Howard B. Williams</td>
-                            <td>1998-10-03</td>
-                        </tr>
-                    
-                        <tr>
-                            <td><a href="/movie/3">New Gospel Evangelize</a></td>
-                            <td>Barry R. Weaver</td>
-                            <td>1995-10-04</td>
-                        </tr>
-                    
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -92,27 +54,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    
+                    {% for movie in actor.directorships %}
                         <tr>
-                            <td><a href="/movie/3">New Gospel Evangelize</a></td>
-                            <td>1995-10-04</td>
+                            <td><a href="{{ url_for('.movie', movie_id=movie.id) }}">{{ movie.name }}</a></td>
+                            <td>{{ movie.release_date }}</td>
                         </tr>
-                    
-                        <tr>
-                            <td><a href="/movie/5">Blue Line</a></td>
-                            <td>2009-08-14</td>
-                        </tr>
-                    
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
-
-        </div>
-        
-        <script src="/static/js/jquery-2.2.3.min.js"></script>
-        <script src="/static/js/bootstrap.min.js"></script>
-        
-        
-    </body>
-</html>
+{% endblock %}
