@@ -2,18 +2,22 @@ import os
 
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:dragon789@localhost/wfdb"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['DEBUG'] = None
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 tags = db.Table(
     'post_tags',
     db.Column('post_id', db.Integer(), db.ForeignKey('post.id')),
     db.Column('tag_id', db.Integer(), db.ForeignKey('tag.id'))
 )
+
 
 class User(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
@@ -48,6 +52,7 @@ class Actor(db.Model):
 class Movie(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String())
+    summary = db.Column(db.Text())
     release_date = db.Column(db.Date())
     director_id = db.Column(db.Integer(), db.ForeignKey('actor.id'))
 
@@ -142,4 +147,7 @@ def post(post_id):
     return render_template("post.html", post=post)
 
 if __name__ == "__main__":
-    app.run(host=os.environ['IP'], port=os.environ['PORT'])
+    if hasattr(os.environ, 'IP') and hasattr(os.environ, 'PORT'):
+        app.run(host=os.environ['IP'], port=os.environ['PORT'])
+    else:
+        app.run()
