@@ -1,3 +1,7 @@
+{% macro format_date(dt) %}
+    {{ dt.strftime('%Y-%m-%d') }}
+{% endmacro %}
+
 <!DOCTYPE html>
 <html lang="en">
     <head>

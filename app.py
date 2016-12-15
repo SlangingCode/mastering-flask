@@ -1,12 +1,18 @@
 import os
 
+from datetime import datetime
+
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_wtf import Form
+from wtforms import TextAreaField
+from wtforms import validators
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:dragon789@localhost/wfdb"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['SECRET_KEY'] = '11bbd83a61b32c7c86a99c956ae2093ffbc5d43ba459ef01'
 app.config['DEBUG'] = None
 
 db = SQLAlchemy(app)
@@ -24,6 +30,7 @@ class User(db.Model):
     username = db.Column(db.String(), unique=True)
     password = db.Column(db.String())
     posts = db.relationship('Post', backref='user', lazy='dynamic')
+    comment = db.relationship('Comment', backref='user', lazy='dynamic')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -103,13 +110,20 @@ class Tag(db.Model):
 
 class Comment(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String())
     text = db.Column(db.Text())
     date = db.Column(db.DateTime())
     post_id = db.Column(db.Integer(), db.ForeignKey('post.id'))
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id'))
 
     def __repr__(self):
         return '<Comment {}>'.format(self.text[:15])
+
+
+class CommentForm(Form):
+    text = TextAreaField(u'Text', validators=[
+        validators.required(),
+        validators.Length(max=2000)
+    ])
 
 
 @app.route("/")
@@ -137,14 +151,26 @@ def movie(movie_id):
 
 @app.route("/blog")
 def blog():
-    return render_template("blog.html")
+    posts = Post.query.order_by(Post.publish_date.desc()).all()
+
+    return render_template("blog.html", posts=posts)
 
 
-@app.route("/blog/<int:post_id>")
+@app.route("/blog/<int:post_id>", methods=["GET", "POST"])
 def post(post_id):
-    post = Actor.query.get_or_404(post_id)
+    post = Post.query.get_or_404(post_id)
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment()
+        comment.text = form.text.data
+        comment.date = datetime.now()
+        comment.post = post
+        comment.user = User.query.get(2)
 
-    return render_template("post.html", post=post)
+        db.session.add(comment)
+        db.session.commit()
+
+    return render_template("post.html", post=post, form=form)
 
 if __name__ == "__main__":
     if hasattr(os.environ, 'IP') and hasattr(os.environ, 'PORT'):
