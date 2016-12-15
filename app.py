@@ -2,7 +2,7 @@ import os
 
 from datetime import datetime
 
-from flask import Flask, render_template
+from flask import Flask, render_template, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_wtf import Form
@@ -126,7 +126,21 @@ class CommentForm(Form):
     ])
 
 
-@app.route("/")
+blog_blueprint = Blueprint(
+    'blog',
+    __name__,
+    template_folder='templates/blog',
+    url_prefix="/blog"
+)
+
+main_blueprint = Blueprint(
+    'main',
+    __name__,
+    template_folder='templates/main',
+)
+
+
+@main_blueprint.route("/")
 def home():
     latest_movies = Movie.query.order_by(
         Movie.release_date.desc()
@@ -135,28 +149,28 @@ def home():
     return render_template("index.html", latest_movies=latest_movies)
 
 
-@app.route("/actor/<int:actor_id>")
+@main_blueprint.route("/actor/<int:actor_id>")
 def actor(actor_id):
     actor = Actor.query.get_or_404(actor_id)
 
     return render_template("actor.html", actor=actor)
 
 
-@app.route("/movie/<int:movie_id>")
+@main_blueprint.route("/movie/<int:movie_id>")
 def movie(movie_id):
-    movie = Actor.query.get_or_404(movie_id)
+    movie = Movie.query.get_or_404(movie_id)
 
     return render_template("movie.html", movie=movie)
 
 
-@app.route("/blog")
+@blog_blueprint.route("/")
 def blog():
     posts = Post.query.order_by(Post.publish_date.desc()).all()
 
     return render_template("blog.html", posts=posts)
 
 
-@app.route("/blog/<int:post_id>", methods=["GET", "POST"])
+@blog_blueprint.route("/<int:post_id>", methods=["GET", "POST"])
 def post(post_id):
     post = Post.query.get_or_404(post_id)
     form = CommentForm()
@@ -171,6 +185,9 @@ def post(post_id):
         db.session.commit()
 
     return render_template("post.html", post=post, form=form)
+
+app.register_blueprint(main_blueprint)
+app.register_blueprint(blog_blueprint)
 
 if __name__ == "__main__":
     if hasattr(os.environ, 'IP') and hasattr(os.environ, 'PORT'):
