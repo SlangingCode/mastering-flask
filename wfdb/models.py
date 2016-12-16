@@ -1,22 +1,8 @@
-import os
-
-from datetime import datetime
-
-from flask import Flask, render_template, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_wtf import Form
-from wtforms import TextAreaField
-from wtforms import validators
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:dragon789@localhost/wfdb"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-app.config['SECRET_KEY'] = '11bbd83a61b32c7c86a99c956ae2093ffbc5d43ba459ef01'
-app.config['DEBUG'] = None
-
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+db = SQLAlchemy()
+migrate = Migrate(db)
 
 tags = db.Table(
     'post_tags',
@@ -117,80 +103,3 @@ class Comment(db.Model):
 
     def __repr__(self):
         return '<Comment {}>'.format(self.text[:15])
-
-
-class CommentForm(Form):
-    text = TextAreaField(u'Text', validators=[
-        validators.required(),
-        validators.Length(max=2000)
-    ])
-
-
-blog_blueprint = Blueprint(
-    'blog',
-    __name__,
-    template_folder='templates/blog',
-    url_prefix="/blog"
-)
-
-main_blueprint = Blueprint(
-    'main',
-    __name__,
-    template_folder='templates/main',
-)
-
-
-@main_blueprint.route("/")
-def home():
-    latest_movies = Movie.query.order_by(
-        Movie.release_date.desc()
-    ).limit(5).all()
-
-    return render_template("index.html", latest_movies=latest_movies)
-
-
-@main_blueprint.route("/actor/<int:actor_id>")
-def actor(actor_id):
-    actor = Actor.query.get_or_404(actor_id)
-
-    return render_template("actor.html", actor=actor)
-
-
-@main_blueprint.route("/movie/<int:movie_id>")
-def movie(movie_id):
-    movie = Movie.query.get_or_404(movie_id)
-
-    return render_template("movie.html", movie=movie)
-
-
-@blog_blueprint.route("/")
-def blog():
-    posts = Post.query.order_by(Post.publish_date.desc()).all()
-
-    return render_template("blog.html", posts=posts)
-
-
-@blog_blueprint.route("/<int:post_id>", methods=["GET", "POST"])
-def post(post_id):
-    post = Post.query.get_or_404(post_id)
-    form = CommentForm()
-    if form.validate_on_submit():
-        comment = Comment()
-        comment.text = form.text.data
-        comment.date = datetime.now()
-        comment.post = post
-        comment.user = User.query.get(2)
-
-        db.session.add(comment)
-        db.session.commit()
-
-    return render_template("post.html", post=post, form=form)
-
-app.register_blueprint(main_blueprint)
-app.register_blueprint(blog_blueprint)
-
-if __name__ == "__main__":
-    if hasattr(os.environ, 'IP') and hasattr(os.environ, 'PORT'):
-        app.run(host=os.environ['IP'], port=os.environ['PORT'])
-    else:
-        app.run()

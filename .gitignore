@@ -2,3 +2,5 @@
 .idea
 /__pycache__/
 /wfdb-venv/
+wfdb/__pycache__/
+wfdb/controllers/__pycache__/
