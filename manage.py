@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import os 
+from os import environ
 
 from flask_script import Server, Manager
 from flask_migrate import MigrateCommand
@@ -8,8 +8,8 @@ from wfdb import app
 
 manager = Manager(app)
 
-if hasattr(os.environ, 'IP') and hasattr(os.environ, 'PORT'):
-    manager.add_command("runserver", Server(host=os.environ['IP'], port=os.environ['PORT']))
+if 'IP' in environ and 'PORT' in environ:
+    manager.add_command('runserver', Server(host=environ['IP'], port=environ['PORT']))
 
 manager.add_command('db', MigrateCommand)
 

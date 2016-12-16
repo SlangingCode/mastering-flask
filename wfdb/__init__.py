@@ -1,4 +1,4 @@
-import os
+from os import environ
 
 from flask import Flask
 
@@ -15,7 +15,7 @@ app.register_blueprint(main_blueprint)
 app.register_blueprint(blog_blueprint)
 
 if __name__ == "__main__":
-    if hasattr(os.environ, 'IP') and hasattr(os.environ, 'PORT'):
+    if 'IP' in environ and 'PORT' in environ:
         app.run(host=os.environ['IP'], port=os.environ['PORT'])
     else:
         app.run()
