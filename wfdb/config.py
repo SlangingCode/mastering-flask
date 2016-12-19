@@ -4,9 +4,7 @@ class Config(object):
 
 class ProdConfig(Config):
     SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:dragon789@localhost/wfdb"
-    DEBUG = False
 
 class DevConfig(Config):
     SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:dragon789@localhost/wfdb"
-    DEBUG = None
-
+    DEBUG = True
