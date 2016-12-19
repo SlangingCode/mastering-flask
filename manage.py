@@ -3,8 +3,13 @@
 from os import environ
 
 from flask_script import Server, Manager
-from flask_migrate import MigrateCommand
-from wfdb import app
+from flask_migrate import Migrate, MigrateCommand
+from wfdb import create_app
+from wfdb.models import db
+
+app = create_app('wfdb.config.DevConfig')
+
+migrate = Migrate(app, db)
 
 manager = Manager(app)
 
